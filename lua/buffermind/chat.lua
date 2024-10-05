@@ -142,9 +142,6 @@ function M.open_chat(filename)
 end
 
 function M.reset_chat_buffer()
-	-- Close the current chat buffer without saving any changes
-	vim.cmd("bwipeout!")
-
 	-- replace the enter buffer with the initial prompt, do not open a new buffer
 	local chat_win = vim.api.nvim_get_current_win()
 	vim.api.nvim_buf_set_lines(0, 0, -1, false, initial_prompt)
