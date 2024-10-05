@@ -98,24 +98,24 @@ end
 local function set_buffer_keymaps(func_name)
   local map_options = { noremap = true, silent = true }
 
-  vim.api.nvim_buf_set_keymap(0, "n", "<leader>chr", "<cmd>ChatReset<CR>", { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(0, "i", "<leader>chr", "<cmd>ChatReset<CR>", { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(0, "n", "<C-r>", "<cmd>ChatReset<CR>", { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(0, "i", "<C-r>", "<cmd>ChatReset<CR>", { noremap = true, silent = true })
 
-  vim.api.nvim_buf_set_keymap(0, "n", "<leader>chc", "<cmd>bd<CR>", { noremap = true, silent = true })
-  vim.api.nvim_buf_set_keymap(0, "i", "<leader>chc", "<cmd>bd<CR>", { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(0, "n", "<C-c>", "<cmd>bd<CR>", { noremap = true, silent = true })
+  vim.api.nvim_buf_set_keymap(0, "i", "<C-c>", "<cmd>bd<CR>", { noremap = true, silent = true })
 
   -- change send_message to func_name
   vim.api.nvim_buf_set_keymap(
     0,
     "n",
-    "<C-]>",
+    "<C-j>",
     '<cmd>lua require("buffermind.chat").' .. func_name .. "()<CR>",
     map_options
   )
   vim.api.nvim_buf_set_keymap(
     0,
     "i",
-    "<C-]>",
+    "<C-j>",
     '<cmd>lua require("buffermind.chat").' .. func_name .. "()<CR>",
     map_options
   )
