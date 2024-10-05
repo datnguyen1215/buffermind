@@ -160,9 +160,11 @@ local function get_all_buffers_content()
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 		if vim.api.nvim_buf_is_loaded(buf) then
 			local buf_name = vim.api.nvim_buf_get_name(buf)
-			local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-			table.insert(all_buffers_content, "File: " .. (buf_name ~= "" and buf_name or "[No Name]"))
-			table.insert(all_buffers_content, table.concat(lines, "\n"))
+			if not buf_name:match("buffermind%..*") then -- Exclude files matching buffermind.*
+				local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+				table.insert(all_buffers_content, "File: " .. (buf_name ~= "" and buf_name or "[No Name]"))
+				table.insert(all_buffers_content, table.concat(lines, "\n"))
+			end
 		end
 	end
 	return table.concat(all_buffers_content, "\n")
@@ -174,7 +176,9 @@ function M.send_message(context)
 		context = ""
 	end
 
-	local full_prompt = context
+	-- include the current buffer's content
+	local current_buffer_content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+	local full_prompt = context .. "\n" .. table.concat(current_buffer_content, "\n")
 
 	local api_key
 	if config.platform == "openai" then
