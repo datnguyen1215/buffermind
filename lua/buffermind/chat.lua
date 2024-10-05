@@ -74,26 +74,14 @@ local function set_buffer_options()
 	vim.bo.buftype = "nofile"
 	vim.bo.bufhidden = "hide"
 	vim.bo.swapfile = false
+	vim.bo.filetype = "markdown"
 	vim.api.nvim_buf_set_name(0, "buffermind." .. config.platform .. ".md")
-end
-
-local function highlight_code_blocks()
-	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-	local in_code_block = false
-	for i, line in ipairs(lines) do
-		if line:match("^```.*") then
-			in_code_block = not in_code_block
-		elseif in_code_block then
-			vim.api.nvim_buf_add_highlight(0, ns_id, "String", i - 1, 0, -1)
-		end
-	end
 end
 
 local function apply_highlights_and_conceal()
 	local function highlight_code()
 		clear_namespace_highlights()
 		apply_line_highlights()
-		highlight_code_blocks()
 	end
 
 	highlight_code()
@@ -192,8 +180,6 @@ function M.send_message(context)
 	-- include the current buffer's content
 	local current_buffer_content = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 	local full_prompt = context .. "\n" .. table.concat(current_buffer_content, "\n")
-
-	print("Full prompt: ", full_prompt)
 
 	local api_key
 	if config.platform == "openai" then
