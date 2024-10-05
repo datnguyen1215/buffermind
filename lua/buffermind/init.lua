@@ -31,5 +31,3 @@ end, { nargs = "?" })
 vim.api.nvim_set_keymap("n", "<leader>chc", "<cmd>ChatOpen<CR>", { noremap = true, silent = true })
 
 vim.api.nvim_set_keymap("n", "<leader>chp", "<cmd>ChatOpen programmer.md<CR>", { noremap = true, silent = true })
-
-vim.api.nvim_set_keymap("n", "<leader>chr", "<cmd>ChatReset<CR>", { noremap = true, silent = true })
