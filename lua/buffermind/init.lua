@@ -28,5 +28,5 @@ vim.api.nvim_create_user_command("ChatOpen", function(opts)
 end, { nargs = "?" })
 
 -- Key mapping for <leader>chc to open chat
-vim.api.nvim_set_keymap("n", "<leader>chc", "<cmd>ChatOpen<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<leader>cho", "<cmd>ChatOpen<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<leader>chp", "<cmd>ChatOpen programmer.md<CR>", { noremap = true, silent = true })
