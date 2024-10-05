@@ -5,6 +5,27 @@ local Job = require("plenary.job")
 -- save the initial prompt when opened chat buffer
 local initial_prompt = nil
 
+local ns_id = vim.api.nvim_create_namespace("chat_highlight_namespace")
+
+local function clear_namespace_highlights()
+	vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+end
+
+local function apply_line_highlights()
+	-- Get all lines in the buffer
+	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+
+	for i, line in ipairs(lines) do
+		if line:find("^You:") then
+			-- Apply highlight for "You:"
+			vim.api.nvim_buf_add_highlight(0, ns_id, "Keyword", i - 1, 0, 4)
+		elseif line:find("^Assistant:") then
+			-- Apply highlight for "Assistant:"
+			vim.api.nvim_buf_add_highlight(0, ns_id, "Identifier", i - 1, 0, 10)
+		end
+	end
+end
+
 function M.find_chat_buffer()
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 		if
@@ -17,8 +38,17 @@ function M.find_chat_buffer()
 end
 
 local function open_vertical_split()
+	-- save the current buffer
+	local new_buf = vim.api.nvim_create_buf(true, true)
+
+	-- Create a new vertical split and return the new window ID
 	vim.cmd("vsplit")
-	return vim.api.nvim_get_current_win()
+	local chat_win = vim.api.nvim_get_current_win()
+
+	-- set the new buffer to the current window
+	vim.api.nvim_win_set_buf(chat_win, new_buf)
+
+	return chat_win
 end
 
 local function get_plugin_path()
@@ -29,10 +59,11 @@ end
 local function get_prompt(filename)
 	local plugin_dir = get_plugin_path()
 	local prompt_path = plugin_dir .. "prompts/" .. filename
+	print("Prompt path: " .. prompt_path)
 	local file = io.open(prompt_path, "r")
 	if not file then
 		print("Failed to open prompt file: " .. prompt_path)
-		return nil
+		return ""
 	end
 	local content = file:read("*a")
 	file:close()
@@ -82,23 +113,26 @@ local function set_buffer_keymaps(func_name)
 end
 
 function M.open_chat(filename)
-	local current_win = vim.api.nvim_get_current_win()
 	local chat_win = open_vertical_split()
 
 	local prompt = "You: "
 
-	if filename == nil then
+	-- if filename is not nil, then get the prompt from the file
+	print(filename)
+	if filename ~= "" then
 		prompt = get_prompt(filename)
 		prompt = prompt .. "\nYou: "
 	end
 
 	initial_prompt = vim.split(prompt, "\n", true)
 
+	-- set initial prompt on the openned buffer
 	vim.api.nvim_buf_set_lines(0, 0, -1, false, initial_prompt)
+
 	set_buffer_options()
 	apply_highlights_and_conceal()
 
-	if filename == nil then
+	if filename == "" then
 		set_buffer_keymaps("send_message")
 	else
 		set_buffer_keymaps("send_message_with_buffers")
@@ -123,14 +157,11 @@ local function get_all_buffers_content()
 		if vim.api.nvim_buf_is_loaded(buf) then
 			local buf_name = vim.api.nvim_buf_get_name(buf)
 			local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-			all_buffers_content = all_buffers_content
-				.. "File: "
-				.. (buf_name ~= "" and buf_name or "[No Name]")
-				.. "\n"
-			all_buffers_content = all_buffers_content .. table.concat(lines, "\n") .. "\n"
+			table.insert(all_buffers_content, "File: " .. (buf_name ~= "" and buf_name or "[No Name]"))
+			table.insert(all_buffers_content, table.concat(lines, "\n"))
 		end
 	end
-	return all_buffers_content
+	return table.concat(all_buffers_content, "\n")
 end
 
 function M.send_message(context)

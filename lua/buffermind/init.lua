@@ -6,7 +6,8 @@ config.setup()
 -- Set up commands and key mappings
 vim.api.nvim_create_user_command("ChatReset", chat.reset_chat_buffer, {})
 
-vim.api.nvim_create_user_command("ChatOpen", function(filename)
+vim.api.nvim_create_user_command("ChatOpen", function(opts)
+	local filename = opts.args or nil
 	local chat_buf = chat.find_chat_buffer()
 	-- print error logs if chat_buf is nil
 	print("Chat buffer not found")
@@ -24,16 +25,11 @@ vim.api.nvim_create_user_command("ChatOpen", function(filename)
 	else
 		chat.open_chat(filename)
 	end
-end, {})
+end, { nargs = "?" })
 
 -- Key mapping for <leader>chc to open chat
 vim.api.nvim_set_keymap("n", "<leader>chc", "<cmd>ChatOpen<CR>", { noremap = true, silent = true })
 
-vim.api.nvim_set_keymap(
-	"n",
-	"<leader>chp",
-	'<cmd>ChatOpen "prompts/programmer.md"<CR>',
-	{ noremap = true, silent = true }
-)
+vim.api.nvim_set_keymap("n", "<leader>chp", "<cmd>ChatOpen programmer.md<CR>", { noremap = true, silent = true })
 
 vim.api.nvim_set_keymap("n", "<leader>chr", "<cmd>ChatReset<CR>", { noremap = true, silent = true })
