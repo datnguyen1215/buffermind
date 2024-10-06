@@ -160,13 +160,20 @@ end
 local function get_all_buffers_content()
   local all_buffers_content = {}
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_loaded(buf) then
-      local buf_name = vim.api.nvim_buf_get_name(buf)
-      if not buf_name:match("buffermind%..*%.md") then -- Exclude files matching buffermind.*.md
-        local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-        table.insert(all_buffers_content, "File: " .. (buf_name ~= "" and buf_name or "[No Name]"))
-        table.insert(all_buffers_content, table.concat(lines, "\n"))
+    local is_loaded = vim.api.nvim_buf_is_loaded(buf)
+    local buf_name = vim.api.nvim_buf_get_name(buf)
+
+    -- Skip unwanted buffers
+    if not buf_name:match("buffermind%..*%.md") then
+      -- Load buffer temporarily if it's not loaded
+      if not is_loaded then
+        vim.fn.bufload(buf) -- Load the buffer
       end
+
+      -- Now we can get its lines
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+      table.insert(all_buffers_content, "File: " .. (buf_name ~= "" and buf_name or "[No Name]"))
+      table.insert(all_buffers_content, table.concat(lines, "\n"))
     end
   end
   return table.concat(all_buffers_content, "\n")
